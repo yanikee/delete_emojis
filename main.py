@@ -23,7 +23,7 @@ async def on_ready():
   print(f"login as {bot.user.mention}")
 
 
-async def delete_emojis()
+async def delete_emojis():
   # :a: :b: の様に削除予定のemojiの名前が羅列したメッセージを取得
   message = await channel.fetch_message(MESSAGE_ID)
   text_l = []
@@ -39,7 +39,7 @@ async def delete_emojis()
   return
 
 # 削除予定の絵文字を出力する
-async def send_will_delete_emojis(message)
+async def send_will_delete_emojis():
   msg = []
   async for message in channel.history(limit=None):
     # ここまでメッセージを読み込む
