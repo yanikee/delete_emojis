@@ -26,58 +26,53 @@ async def on_ready():
 async def delete_emojis():
   # :a: :b: の様に削除予定のemojiの名前が羅列したメッセージを取得
   message = await channel.fetch_message(MESSAGE_ID)
-  text_l = []
   for x in message.content.split(" "):
-    text_l.append(x.split(":")[2][:-1])
-  print(text_l)
+    try:
+      emoji_id = int(x.split(":")[2][:-1]))
+      emoji = guild.get_emoji(emoji_id)
+      await emoji.delete(reason="第n回 絵文字大整理大会")
+    except ValueError:
+      print(f"intにできなかった：{emoji_id}")
+    except discord.HTTPException:
+      print(f"消せなかったお：{emoji_id}")
+    except:
+      print(f"不明なエラーだお：{emoji_id}")
 
-  for x in text_l:
-    emoji = guild.get_emoji(int(x))
-    await emoji.delete(reason="第n回 絵文字大整理大会")
-  await channel.send("削除しました")
+  await channel.send("指定された絵文字を削除しました")
 
-  return
 
 # 削除予定の絵文字を出力する
 async def send_will_delete_emojis():
-  msg = []
+  will_not_delete = []
   async for message in channel.history(limit=None):
     # ここまでメッセージを読み込む
     # 説明文のメッセージとかで切ってもろて
-    if message.id == 1229331189987409940:
+    if message.id == MESSAGE_ID:
       break
-    msg += message.content.split(":")
 
-  for x in msg:
-    if len(x) >= 16:
-      msg.remove(x)
-  for x in msg:
-    if "<" in x:
-      msg.remove(x)
-  for x in msg:
-    if ">" in x:
-      msg.remove(x)
+    text = message.content.split(":")
+    # ここでは絵文字のnameを取得したいので、IDとかは除外
+    if len(text) >= 16 or "<" in text or ">" in text:
+      continue
 
-  emoji_name_l = [x.name for x in guild.emojis]
+    will_not_delete += text
+
+  # 削除する：True
+  # 削除しない：False
   emoji_dict = {}
-  for x in emoji_name_l:
-    emoji_dict[x] = False
+  will_delete = []
 
-  for x in msg:
-    try:
-      emoji_dict[x] = True
-    except KeyError:
-      print(x)
+  for emoji in guild.emojis:
+    if emoji.name in will_not_delete:
+      emoji_dict[emoji.name] = False
+    else:
+      emoji_dict[emoji.name] = True
+      will_delete.append(emoji)
 
-# 消さない：True
-  send_msg = []
-  for x in emoji_dict:
-    if not emoji_dict[x]:
-      send_msg.append(f":{x}:")
-  print(len(send_msg))
-  body = " ".join(send_msg)
   # 削除予定の絵文字を送信する
+  body = " ".join(will_delete)
   await channel.send(body)
+
 
 
 # ログいっぱいだとウザいのでWARNING以上にしてます。
